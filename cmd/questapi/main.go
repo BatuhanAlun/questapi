@@ -3,11 +3,16 @@ package main
 import (
 	"net/http"
 	"questapi/internal/handlers"
+	"questapi/internal/utils"
 )
 
 func main() {
-	http.HandleFunc("/register", handlers.RegisterHandler)
-	http.HandleFunc("/login", handlers.LoginHandler)
-	http.HandleFunc("/quest", handlers.Quest)
-	http.ListenAndServe(":8080", nil)
+
+	router := http.NewServeMux()
+
+	router.HandleFunc("POST /register", handlers.RegisterHandler)
+	router.HandleFunc("POST /login", handlers.LoginHandler)
+	router.Handle("GET /quest", utils.MiddlewareAuthJWT(http.HandlerFunc(handlers.Quest)))
+
+	http.ListenAndServe(":8080", router)
 }

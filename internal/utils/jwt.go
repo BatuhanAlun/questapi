@@ -2,6 +2,7 @@ package utils
 
 import (
 	"fmt"
+	"net/http"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -27,35 +28,47 @@ func GenerateJWT(username string) (string, error) {
 	return tokenString, nil
 }
 
-func AuthJWT(tokenString string) error {
+func MiddlewareAuthJWT(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-	if len(tokenString) > 7 && tokenString[:7] == "Bearer " {
-		tokenString = tokenString[7:]
-	}
+		tokenString := r.Header.Get("Authorization")
 
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method")
+		if tokenString == "" {
+			http.Error(w, "Authorization header is required", http.StatusUnauthorized)
+			return
 		}
-		return jwtKey, nil
+
+		if len(tokenString) > 7 && tokenString[:7] == "Bearer " {
+			tokenString = tokenString[7:]
+		}
+
+		token, err := jwt.Parse(tokenString, keyFunc)
+		if err != nil {
+			http.Error(w, "Invalid token: "+err.Error(), http.StatusUnauthorized)
+			return
+		}
+
+		claims, ok := token.Claims.(jwt.MapClaims)
+
+		if !ok || !token.Valid {
+			http.Error(w, "Invalid token", http.StatusUnauthorized)
+			return
+		}
+
+		_, ok = claims["username"].(string)
+
+		if !ok {
+			http.Error(w, "Invalid token: username not found", http.StatusUnauthorized)
+			return
+		}
+
+		next.ServeHTTP(w, r)
 	})
-	if err != nil {
-		return fmt.Errorf("Invalid Token")
+}
+
+func keyFunc(token *jwt.Token) (interface{}, error) {
+	if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+		return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 	}
-
-	claims, ok := token.Claims.(jwt.MapClaims)
-
-	if !ok || !token.Valid {
-		return fmt.Errorf("Invalid Token")
-	}
-
-	_, ok = claims["username"].(string)
-
-	if !ok {
-		return fmt.Errorf("Invalid Token:username not found")
-	}
-
-	return nil
-
+	return jwtKey, nil
 }
