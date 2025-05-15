@@ -14,7 +14,7 @@ import (
 var db *sql.DB
 
 func InitDB() {
-	connStr := "user=questapi dbname=questapi password=securepass host=localhost sslmode=disable"
+	connStr := "user=questuser dbname=questapi password=securepass host=localhost sslmode=disable"
 
 	var err error
 
@@ -39,6 +39,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	var user models.User
 
 	user.ID = uuid.New()
+	user.Role = "user"
 
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
@@ -58,7 +59,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Username or Password could not be blank!", http.StatusBadRequest)
 	}
 
-	_, err = db.Exec("INSERT INTO users (id, username, password) VALUES ($1, $2, $3)", user.ID, user.Username, user.Password)
+	_, err = db.Exec("INSERT INTO users (id, username, password, userrole) VALUES ($1, $2, $3, $4)", user.ID, user.Username, user.Password, user.Role)
 
 	if err != nil {
 		http.Error(w, "Insert is failed", http.StatusInternalServerError)
