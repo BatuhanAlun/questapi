@@ -11,30 +11,15 @@ import (
 	_ "github.com/lib/pq"
 )
 
-var db *sql.DB
-
-func InitDB() {
-	connStr := "user=questuser dbname=questapi password=securepass host=localhost sslmode=disable"
-
-	var err error
-
-	db, err = sql.Open("postgres", connStr)
-	if err != nil {
-		log.Fatalf("Error on opening DB: %v", err)
-	}
-
-	err = db.Ping()
-	if err != nil {
-		log.Fatalf("Error on connectiong DB: %v", err)
-	}
-	log.Println("Connection Succesfuly Established")
-
+type RegisterHandlerSturct struct {
+	DB *sql.DB
 }
 
-func RegisterHandler(w http.ResponseWriter, r *http.Request) {
+func NewRegisterHandler(db *sql.DB) *RegisterHandlerSturct {
+	return &RegisterHandlerSturct{DB: db}
+}
 
-	InitDB()
-	defer db.Close()
+func (h *RegisterHandlerSturct) RegisterHandler(w http.ResponseWriter, r *http.Request) {
 
 	var user models.User
 
@@ -59,7 +44,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Username or Password could not be blank!", http.StatusBadRequest)
 	}
 
-	_, err = db.Exec("INSERT INTO users (id, username, password, userrole) VALUES ($1, $2, $3, $4)", user.ID, user.Username, user.Password, user.Role)
+	_, err = h.DB.Exec("INSERT INTO users (id, username, password, role) VALUES ($1, $2, $3, $4)", user.ID, user.Username, user.Password, user.Role)
 
 	if err != nil {
 		http.Error(w, "Insert is failed", http.StatusInternalServerError)

@@ -9,14 +9,20 @@ import (
 	"questapi/internal/utils"
 )
 
-func LoginHandler(w http.ResponseWriter, r *http.Request) {
+type AuthHandler struct {
+	DB *sql.DB
+}
+
+func NewAuthHandler(db *sql.DB) *AuthHandler {
+	return &AuthHandler{DB: db}
+}
+
+func (h *AuthHandler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	var user models.User
 	var sqlUsername string
 	var sqlPassword string
-
-	InitDB()
-	defer db.Close()
+	var sqlRole string
 
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
@@ -36,7 +42,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Username or Password could not be blank!", http.StatusBadRequest)
 	}
 
-	err = db.QueryRow("SELECT username, password FROM users WHERE username = $1", user.Username).Scan(&sqlUsername, &sqlPassword)
+	err = h.DB.QueryRow("SELECT username, password, role FROM users WHERE username = $1", user.Username).Scan(&sqlUsername, &sqlPassword, &sqlRole)
 
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -54,7 +60,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := utils.GenerateJWT(user.Username)
+	token, err := utils.GenerateJWT(user.Username, sqlRole)
 
 	if err != nil {
 		http.Error(w, "Error generating JWT", http.StatusInternalServerError)

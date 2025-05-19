@@ -3,8 +3,8 @@ POST http://localhost:8080/register
 Content-Type: application/json
 
 {
-    "username": "batu2",
-    "password": "1234"
+    "username": "admin",
+    "password": "admin"
 }
 
 ###Login User
@@ -12,11 +12,36 @@ POST http://localhost:8080/login
 Content-Type: application/json
 
 {
-    "username": "batu2",
+    "username": "babasorucu",
     "password": "1234"
 }
+###
+###{
+ # "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTAyNTMwNjUsImlhdCI6MTc0NzY2MTA2NSwidXNlcm5hbWUiOiJhZG1pbiJ9.NirCvXA2c8HO3pzk6yrADG2Kq76_9Em0na2wVr68k20"
+#}
 ###
 
 GET  http://localhost:8080/quest
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDczNDcxMDUsImlhdCI6MTc0NzI2MDcwNSwidXNlcm5hbWUiOiJiYXR1MiJ9.ZlVAv7D1EHmUNOdRyOVwwjAC_w1Pkx8Jb_2N0ZGPEbM
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTAyNTQxNDEsImlhdCI6MTc0NzY2MjE0MSwicm9sZSI6ImFkbWluIiwidXNlcm5hbWUiOiJiYWJhc29ydWN1In0.cR0Eu-Rz4O-eggXlR7LXCCqxrvUdvz7Rz-dap3AOalU
+
+###
+POST http://localhost:8080/admin/challange HTTP/1.1
+Content-Type: application/json
+Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTAyNTU1NDAsImlhdCI6MTc0NzY2MzU0MCwicm9sZSI6ImFkbWluIiwidXNlcm5hbWUiOiJiYWJhc29ydWN1In0.8G5yKET-B-xE6oMlhf3LUj3yKkcgZ5CzLo8VAygoqZ8
+
+{
+    "challange-name": "yarismacilarasi"
+}
+
+###
+DELETE http://localhost:8080/admin/challange/4 HTTP/1.1
+Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTAyNTU1NDAsImlhdCI6MTc0NzY2MzU0MCwicm9sZSI6ImFkbWluIiwidXNlcm5hbWUiOiJiYWJhc29ydWN1In0.8G5yKET-B-xE6oMlhf3LUj3yKkcgZ5CzLo8VAygoqZ8
+###
+PUT http://localhost:8080/admin/challange/3 HTTP/1.1
+Content-Type: application/json
+Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTAyNTU1NDAsImlhdCI6MTc0NzY2MzU0MCwicm9sZSI6ImFkbWluIiwidXNlcm5hbWUiOiJiYWJhc29ydWN1In0.8G5yKET-B-xE6oMlhf3LUj3yKkcgZ5CzLo8VAygoqZ8
+
+{
+    "challange-name": "babayar"
+}

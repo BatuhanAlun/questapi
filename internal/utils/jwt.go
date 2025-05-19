@@ -10,11 +10,12 @@ import (
 
 var jwtKey = []byte("jwtkey")
 
-func GenerateJWT(username string) (string, error) {
+func GenerateJWT(username, role string) (string, error) {
 
 	claims := jwt.MapClaims{
 		"username": username,
-		"exp":      time.Now().Add(time.Hour * 24).Unix(),
+		"role":     role,
+		"exp":      time.Now().Add(time.Hour * 720).Unix(),
 		"iat":      time.Now().Unix(),
 	}
 
@@ -42,7 +43,7 @@ func MiddlewareAuthJWT(next http.Handler) http.Handler {
 			tokenString = tokenString[7:]
 		}
 
-		token, err := jwt.Parse(tokenString, keyFunc)
+		token, err := jwt.Parse(tokenString, JWTKeyFunc)
 		if err != nil {
 			http.Error(w, "Invalid token: "+err.Error(), http.StatusUnauthorized)
 			return
@@ -66,7 +67,7 @@ func MiddlewareAuthJWT(next http.Handler) http.Handler {
 	})
 }
 
-func keyFunc(token *jwt.Token) (interface{}, error) {
+func JWTKeyFunc(token *jwt.Token) (interface{}, error) {
 	if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 		return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 	}
